@@ -1,18 +1,22 @@
 package user_routes
 
 import (
+
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/hashing/bcrypt"
+     mobile "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user/verification/mobile"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
-func UserRoutes(router *gin.RouterGroup,DB *gorm.DB){
+func UserRoutes(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
     userRoutes := router.Group("/user")
-	UserRegistration(userRoutes,DB);
+	UserRegistration(userRoutes,DB,redisClient);
+	Verification(userRoutes,DB,redisClient)
 }
 
-func UserRegistration(router *gin.RouterGroup,DB *gorm.DB){
+func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 
 	router.POST("/register",func(ctx *gin.Context) {
         type UserRegister struct{
@@ -40,14 +44,20 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB){
 			Age : data.Age,
 		}
 		if err!=nil {
-			ctx.String(400,"Data inadequate")
+			ctx.JSON(400,gin.H{"error":"Data Inadequate"})
 			return
 		}
 		createResponse := DB.Create(&user)
 		if createResponse.Error!=nil{
-			panic(createResponse.Error)
+			ctx.JSON(500,gin.H{"error":createResponse.Error.Error()})
+			return
 		}
-        ctx.String(201,"Registration Successfull ✅")
+        ctx.JSON(201,gin.H{"message":"Registration Successfull ✅"})
 	})
+}
+
+func Verification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
+	verificationRoutes := router.Group("/verify")
+    mobile.MobileVerification(verificationRoutes,DB,redisClient)
 }
 

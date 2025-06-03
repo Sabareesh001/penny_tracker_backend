@@ -8,6 +8,7 @@ import (
 	user_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1"
 	"github.com/gin-gonic/gin"
 	database "github.com/Sabareesh001/penny_tracker_backend/internal/database"
+	redis "github.com/Sabareesh001/penny_tracker_backend/internal/redis"
 )
 
 /*
@@ -24,10 +25,11 @@ func main(){
 		return
 	}
 	DB := database.Connect()
+	redisClient := redis.GetRedisClient(); 
     router := gin.Default()
 	router.Use();
 	apiGroup := router.Group("/api")
-	user_routes.UserRoutes(apiGroup.Group("/v1"),DB)
+	user_routes.UserRoutes(apiGroup.Group("/v1"),DB,redisClient)
 	PORT := os.Getenv("PORT")
     router.Run(":"+PORT)
 }
