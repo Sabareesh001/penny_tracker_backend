@@ -1,18 +1,25 @@
 package user_routes
 
 import (
+	"context"
+	"fmt"
+	"strconv"
+	"time"
+
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/hashing/bcrypt"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
-func UserRoutes(router *gin.RouterGroup,DB *gorm.DB){
+func UserRoutes(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
     userRoutes := router.Group("/user")
-	UserRegistration(userRoutes,DB);
+	UserRegistration(userRoutes,DB,redisClient);
+	Verification(userRoutes,DB,redisClient)
 }
 
-func UserRegistration(router *gin.RouterGroup,DB *gorm.DB){
+func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 
 	router.POST("/register",func(ctx *gin.Context) {
         type UserRegister struct{
@@ -51,3 +58,42 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB){
 	})
 }
 
+func Verification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
+	verificationRoutes := router.Group("/verify")
+    MobileVerification(verificationRoutes,DB,redisClient)
+}
+
+func MobileVerification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
+    mobileRoutes := router.Group("/mobile")
+	RequestOtp(mobileRoutes,DB,redisClient)
+}
+
+func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
+      
+		router.GET("/requestOtp",func(ctx *gin.Context) {
+
+			
+			type MobileData struct{
+				Mobile string `json:"mobile"`
+				UserId int `json:"userId"`
+			}
+			data  := MobileData{}
+			err := ctx.ShouldBindBodyWithJSON(&data)
+			if err!=nil {
+				panic(err)
+			}
+			
+			var existingList []userModel.User;
+			DB.Where("phone = ?",data.Mobile).Find(&existingList)
+			
+			if(len(existingList)>0){
+				ctx.String(400,"Mobile Number Already Used")
+				return
+			}
+            
+
+			fmt.Println(data);
+				mobileCtx := context.Background()
+				redisClient.Set(mobileCtx,data.Mobile+"user:"+strconv.Itoa(data.UserId),900,30*time.Second)
+			})
+}
