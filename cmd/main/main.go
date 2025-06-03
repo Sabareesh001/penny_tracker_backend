@@ -10,6 +10,12 @@ import (
 	database "github.com/Sabareesh001/penny_tracker_backend/internal/database"
 )
 
+/*
+
+API Documentation => https://documenter.getpostman.com/view/32893888/2sB2qi7HKa
+
+*/
+
 func main(){
 	err := godotenv.Load("./database.env","./main.env")
 	if(err!=nil){
