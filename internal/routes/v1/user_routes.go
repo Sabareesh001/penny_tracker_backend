@@ -1,10 +1,10 @@
 package user_routes
 
 import (
-	"fmt"
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/hashing/bcrypt"
 )
 
 func UserRoutes(router *gin.RouterGroup,DB *gorm.DB){
@@ -33,16 +33,21 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB){
 			First_Name: data.FirstName,
 			Last_Name: data.LastName,
             Username: data.Username,
-			Password: data.Password,
+			Password: bcrypt.BcryptGetHash(data.Password),
 			Occupation: data.Occupation,
-			Gender : data.Gender,
-			Country: data.Country,
+			Gender: data.Gender,
+			Country: data.Country,                
 			Age : data.Age,
 		}
 		if err!=nil {
 			ctx.String(400,"Data inadequate")
+			return
 		}
-		DB.Create(&user)
-        fmt.Println(user.First_Name);
+		createResponse := DB.Create(&user)
+		if createResponse.Error!=nil{
+			panic(createResponse.Error)
+		}
+        ctx.String(201,"Registration Successfull ✅")
 	})
 }
+
