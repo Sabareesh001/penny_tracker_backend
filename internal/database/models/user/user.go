@@ -24,6 +24,7 @@ type User struct {
 type Country struct {
 	Id   int    `gorm:"primaryKey"`
 	Name string
+	Code string
 }
 
 type Gender struct {

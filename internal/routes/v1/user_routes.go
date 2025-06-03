@@ -1,13 +1,10 @@
 package user_routes
 
 import (
-	"context"
-	"fmt"
-	"strconv"
-	"time"
 
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/hashing/bcrypt"
+     mobile "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user/verification/mobile"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -47,53 +44,20 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Cli
 			Age : data.Age,
 		}
 		if err!=nil {
-			ctx.String(400,"Data inadequate")
+			ctx.JSON(400,gin.H{"error":"Data Inadequate"})
 			return
 		}
 		createResponse := DB.Create(&user)
 		if createResponse.Error!=nil{
-			panic(createResponse.Error)
+			ctx.JSON(500,gin.H{"error":createResponse.Error.Error()})
+			return
 		}
-        ctx.String(201,"Registration Successfull ✅")
+        ctx.JSON(201,gin.H{"message":"Registration Successfull ✅"})
 	})
 }
 
 func Verification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 	verificationRoutes := router.Group("/verify")
-    MobileVerification(verificationRoutes,DB,redisClient)
+    mobile.MobileVerification(verificationRoutes,DB,redisClient)
 }
 
-func MobileVerification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
-    mobileRoutes := router.Group("/mobile")
-	RequestOtp(mobileRoutes,DB,redisClient)
-}
-
-func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
-      
-		router.GET("/requestOtp",func(ctx *gin.Context) {
-
-			
-			type MobileData struct{
-				Mobile string `json:"mobile"`
-				UserId int `json:"userId"`
-			}
-			data  := MobileData{}
-			err := ctx.ShouldBindBodyWithJSON(&data)
-			if err!=nil {
-				panic(err)
-			}
-			
-			var existingList []userModel.User;
-			DB.Where("phone = ?",data.Mobile).Find(&existingList)
-			
-			if(len(existingList)>0){
-				ctx.String(400,"Mobile Number Already Used")
-				return
-			}
-            
-
-			fmt.Println(data);
-				mobileCtx := context.Background()
-				redisClient.Set(mobileCtx,data.Mobile+"user:"+strconv.Itoa(data.UserId),900,30*time.Second)
-			})
-}
