@@ -7,8 +7,11 @@ type User struct {
 	First_Name   string
 	Last_Name    string
 	Age          int
-	mail         string
-	phone        string
+	Email         string
+	Phone        string
+
+	IsEmailVerified string `gorm:"column:isEmailVerified"`
+    IsPhoneVerified string `gorm:"column:isPhoneVerified"`
 
 	Occupation int
 	OccupationKey   Occupation `gorm:"foreignKey:OccupationKey"`

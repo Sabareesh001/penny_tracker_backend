@@ -18,7 +18,7 @@ API Documentation => https://documenter.getpostman.com/view/32893888/2sB2qi7HKa
 */
 
 func main(){
-	err := godotenv.Load("./database.env","./main.env")
+	err := godotenv.Load("./database.env","./main.env","./email.env")
 	if(err!=nil){
 		fmt.Println("Error in Loading env file")
 		fmt.Println(err)

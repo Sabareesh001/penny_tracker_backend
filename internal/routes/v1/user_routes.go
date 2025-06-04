@@ -1,10 +1,12 @@
 package user_routes
 
 import (
-
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user/verification/email"
+	inserts "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user/insert"
+	mobile "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user/verification/mobile"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/hashing/bcrypt"
-     mobile "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user/verification/mobile"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/responses" 
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -14,6 +16,7 @@ func UserRoutes(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
     userRoutes := router.Group("/user")
 	UserRegistration(userRoutes,DB,redisClient);
 	Verification(userRoutes,DB,redisClient)
+	Insert(userRoutes,DB,redisClient)
 }
 
 func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
@@ -42,12 +45,14 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Cli
 			Gender: data.Gender,
 			Country: data.Country,                
 			Age : data.Age,
+			Phone : data.Phone,
+			Email : data.Email,
 		}
 		if err!=nil {
-			ctx.JSON(400,gin.H{"error":"Data Inadequate"})
+			response.DataInAdequate(ctx)
 			return
 		}
-		createResponse := DB.Create(&user)
+		createResponse := DB.Omit("isEmailVerified","isPhoneVerified").Create(&user)
 		if createResponse.Error!=nil{
 			ctx.JSON(500,gin.H{"error":createResponse.Error.Error()})
 			return
@@ -56,8 +61,14 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Cli
 	})
 }
 
+func Insert(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
+	insertRoutes := router.Group("/add")
+	inserts.InsertEmail(insertRoutes,DB,redisClient)
+}
+
 func Verification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 	verificationRoutes := router.Group("/verify")
     mobile.MobileVerification(verificationRoutes,DB,redisClient)
+	email.EmailVerification(verificationRoutes,DB,redisClient)
 }
 
