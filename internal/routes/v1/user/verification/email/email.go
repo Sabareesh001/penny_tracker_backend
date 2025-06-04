@@ -9,6 +9,7 @@ import (
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/email"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/otp"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/contextKeys/userId"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -24,10 +25,10 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
       
 		router.POST("/requestOtp",func(ctx *gin.Context) {
 
-			
+			 UserId := userId.GetUserId(ctx)
+
 			type Body struct{
 				Email string `json:"email"`
-				UserId int `json:"userId"`
 			}
 			body  := Body{}
 			err := ctx.ShouldBindJSON(&body)
@@ -40,12 +41,12 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 			DB.Where("email = ?",body.Email).Find(&existingList)
 			
 			if len(existingList)==0 {
-				ctx.JSON(401,gin.H{"error":"🚫 Unauthorized Attempt"})
+				response.UnauthorizedAccess(ctx)
 				return
 			}
 
 			emailCtx := context.Background()
-            key := body.Email+"user:"+strconv.Itoa(body.UserId)
+            key := body.Email+"user:"+UserId
             keyAlreadyExist := redisClient.Get(emailCtx,key)
 			if keyAlreadyExist.Err()!=redis.Nil {
               ctx.JSON(400,gin.H{"error":"Wait for sometime to request OTP again ⌚"})
@@ -70,9 +71,11 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 
 func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 	 router.POST("/validateOtp",func(ctx *gin.Context) {
+		
+        UserId := userId.GetUserId(ctx)
+
 		type Body struct{
 				Email string `json:"email"`
-				UserId int `json:"userId"`
 				Otp int `json:"otp"`
 			}
 		body := Body{}
@@ -86,7 +89,7 @@ func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 		
         model := userModel.User{}
 
-        matchingRecord := DB.Where("id=? AND email=?",body.UserId,body.Email).First(&model)
+        matchingRecord := DB.Where("id=? AND email=?",UserId,body.Email).First(&model)
 
         if matchingRecord.RowsAffected == 0 {
 			response.NoMatchingRecords(ctx)
@@ -98,7 +101,7 @@ func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 			return
 		}
 
-        key := body.Email+"user:"+strconv.Itoa(body.UserId)
+        key := body.Email+"user:"+UserId
 		emailCtx := context.Background()
 
 	    originalOtp := redisClient.Get(emailCtx,key)

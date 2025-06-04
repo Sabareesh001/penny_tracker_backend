@@ -6,6 +6,7 @@ import (
 	"time"
 
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/contextKeys/userId"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/otp"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
@@ -22,11 +23,11 @@ func MobileVerification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.C
 func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
       
 		router.POST("/requestOtp",func(ctx *gin.Context) {
-
+ 
+			 UserId := userId.GetUserId(ctx)
 			
 			type Body struct{
 				Mobile string `json:"mobile"`
-				UserId int `json:"userId"`
 			}
 			body  := Body{}
 			err := ctx.ShouldBindJSON(&body)
@@ -35,16 +36,16 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 				return
 			}
 			
-			var existingList []userModel.User;
-			DB.Where("phone = ?",body.Mobile).Find(&existingList)
+			var model userModel.User;
+			DB.Where("phone = ?",body.Mobile).Find(&model)
 			
-			if(len(existingList)>0){
+			if(strconv.Itoa(model.Id) != UserId){
 				ctx.JSON(400,gin.H{"error":"Mobile Number Already Used"})
 				return
 			}
 
 			mobileCtx := context.Background()
-            key := body.Mobile+"user:"+strconv.Itoa(body.UserId)
+            key := body.Mobile+"user:"+UserId
             keyAlreadyExist := redisClient.Get(mobileCtx,key)
 			if keyAlreadyExist.Err()!=redis.Nil {
               ctx.JSON(400,gin.H{"error":"Wait for sometime to request OTP again ⌚"})
@@ -59,16 +60,18 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 
 func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 	 router.POST("/validateOtp",func(ctx *gin.Context) {
+
+        UserId := userId.GetUserId(ctx)
+		
 		type Body struct{
 				Mobile string `json:"mobile"`
-				UserId int `json:"userId"`
 				Otp int `json:"otp"`
 			}
 		body := Body{}
 
 		ctx.ShouldBindJSON(&body)
       
-        key := body.Mobile+"user:"+strconv.Itoa(body.UserId)
+        key := body.Mobile+"user:"+UserId
 		mobileCtx := context.Background() 
 
 	    originalOtp := redisClient.Get(mobileCtx,key)
