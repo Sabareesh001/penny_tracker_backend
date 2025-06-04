@@ -1,6 +1,7 @@
 package authmiddleware
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -13,12 +14,22 @@ import (
 func AuthorizeJWT(ctx *gin.Context){
 	SECRET_KEY := os.Getenv("JWT_SECRET")
 	tokenStr := ctx.GetHeader("Authorization")
-	tokenStr = strings.Replace(tokenStr,"Bearer","",1)
-	tokenStr = strings.Trim(tokenStr," ")
+	if(tokenStr==""){
+        tokenCookie,err := ctx.Cookie("auth_token")
+		if(err!=nil){
+			response.UnauthorizedAccess(ctx)
+			return
+		}
+		tokenStr = tokenCookie
+	}else{
+		tokenStr = strings.TrimPrefix(tokenStr,"Bearer ")
+	}
     token,err := jwtAuth.ValidateJwt(tokenStr,SECRET_KEY)
 	
 	if(err!=nil){
 		response.UnauthorizedAccess(ctx)
+		fmt.Println(err.Error())
+		return
 	}
     
 	claims := token.Claims.(jwt.MapClaims)
