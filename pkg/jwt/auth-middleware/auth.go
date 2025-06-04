@@ -1,8 +1,6 @@
 package authmiddleware
 
 import (
-	// "fmt"
-	"fmt"
 	"os"
 	"strings"
 
@@ -14,7 +12,6 @@ import (
 
 func AuthorizeJWT(ctx *gin.Context){
 	SECRET_KEY := os.Getenv("JWT_SECRET")
-    fmt.Println(SECRET_KEY)
 	tokenStr := ctx.GetHeader("Authorization")
 	tokenStr = strings.Replace(tokenStr,"Bearer","",1)
 	tokenStr = strings.Trim(tokenStr," ")
