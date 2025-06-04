@@ -1,14 +1,16 @@
 package mobile
 
-import(
-	"github.com/Sabareesh001/penny_tracker_backend/pkg/otp"
-	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
+import (
 	"context"
 	"strconv"
 	"time"
+
+	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/otp"
+	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 func MobileVerification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
@@ -29,7 +31,7 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 			body  := Body{}
 			err := ctx.ShouldBindJSON(&body)
 			if err!=nil {
-				ctx.JSON(400,gin.H{"error":"Data Inadequate"})
+				response.DataInAdequate(ctx)
 				return
 			}
 			

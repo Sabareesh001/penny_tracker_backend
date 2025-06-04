@@ -1,15 +1,17 @@
 package email
 
-import(
-	"github.com/Sabareesh001/penny_tracker_backend/pkg/otp"
-	"github.com/Sabareesh001/penny_tracker_backend/pkg/email"
-	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
-	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
+import (
 	"context"
 	"strconv"
 	"time"
+
+	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/email"
+	"github.com/Sabareesh001/penny_tracker_backend/pkg/otp"
+	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
+	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
 func EmailVerification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
@@ -30,15 +32,15 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 			body  := Body{}
 			err := ctx.ShouldBindJSON(&body)
 			if err!=nil {
-				ctx.JSON(400,gin.H{"error":"Data Inadequate"})
+				response.DataInAdequate(ctx)
 				return
 			}
 			
 			var existingList []userModel.User;
 			DB.Where("email = ?",body.Email).Find(&existingList)
 			
-			if(len(existingList)>0){
-				ctx.JSON(400,gin.H{"error":"Mobile Number Already Used"})
+			if len(existingList)==0 {
+				ctx.JSON(401,gin.H{"error":"🚫 Unauthorized Attempt"})
 				return
 			}
 
@@ -75,18 +77,44 @@ func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 			}
 		body := Body{}
 
-		ctx.ShouldBindJSON(&body)
+		parseError := ctx.ShouldBindJSON(&body)
       
+		if parseError!=nil{
+			response.DataInAdequate(ctx)
+			return
+		}
+		
+        model := userModel.User{}
+
+        matchingRecord := DB.Where("id=? AND email=?",body.UserId,body.Email).First(&model)
+
+        if matchingRecord.RowsAffected == 0 {
+			response.NoMatchingRecords(ctx)
+			return
+		}
+
+		if matchingRecord.Error != nil {
+			response.SomethingWentWrong(ctx)
+			return
+		}
+
         key := body.Email+"user:"+strconv.Itoa(body.UserId)
-		emailCtx := context.Background() 
+		emailCtx := context.Background()
 
 	    originalOtp := redisClient.Get(emailCtx,key)
-
-
 
 		if originalOtp.Err() == redis.Nil || originalOtp.Val() != strconv.Itoa(body.Otp) {
             ctx.JSON(400,gin.H{"error":"Invalid OTP 🚫"})
 			return;
+		}
+
+        model.IsEmailVerified = "1"
+
+		updateEmailVerification := DB.Save(&model)
+
+        if updateEmailVerification.Error != nil {
+			response.SomethingWentWrong(ctx)
+			return
 		}
 
         ctx.JSON(200,gin.H{"success":"OTP is verified Successfully 🎉"})
