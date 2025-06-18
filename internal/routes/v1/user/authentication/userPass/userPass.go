@@ -25,6 +25,7 @@ func UserPassValidation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis
      
         if parseError!=nil {
 			response.DataInAdequate(ctx)
+			return
 		}
 
 		model := userModel.User{}
@@ -48,7 +49,7 @@ func UserPassValidation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis
 		}
         claims := jwt.MapClaims{
 				"userId": model.Id,
-				"expiry": time.Now().Add(time.Hour*1).Unix(),
+				"expiry": time.Now().Add(time.Hour*24).Unix(),
 			}
         token,err := jwtAuth.AssignJWT(claims,[]byte(os.Getenv("JWT_SECRET")))
 
@@ -56,6 +57,8 @@ func UserPassValidation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis
 			response.SomethingWentWrong(ctx)
 			return
 		}
+
+		ctx.SetCookie("auth_token",token,93600,"/","",true,true)
 
 		ctx.JSON(202,gin.H{"message":"Successfully validated credentials ✅","token":token})
 

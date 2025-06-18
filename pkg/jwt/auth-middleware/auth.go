@@ -30,7 +30,7 @@ func AuthorizeJWT(ctx *gin.Context){
 		response.UnauthorizedAccess(ctx)
 		fmt.Println(err.Error())
 		return
-	}
+             	}
     
 	claims := token.Claims.(jwt.MapClaims)
 

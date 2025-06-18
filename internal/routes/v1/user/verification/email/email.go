@@ -24,7 +24,7 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
         
 		router.POST("/requestOtp",func(ctx *gin.Context) {
 		   UserId := userId.GetUserId(ctx)
-           generateotp.GenerateOtp(ctx,DB,redisClient,UserId,"OTP for Penny Tracker Registration","user:",time.Second*40)
+           generateotp.GenerateOtp(ctx,DB,redisClient,UserId,"OTP for Penny Tracker Registration","user:",time.Minute*2)
 		})
 } 
 
@@ -43,6 +43,14 @@ func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 			ctx.Abort()
 			return
 		}
+ 
+		fetchRecord := DB.Where("email=? AND id=?",body.Email,UserId).First(&model)
+
+        if(fetchRecord.Error != nil ){
+			response.SomethingWentWrong(ctx)
+			return
+		}
+
         model.IsEmailVerified = "1"
 
 		updateEmailVerification := DB.Save(&model)

@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
-	user_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1"
-	"github.com/gin-gonic/gin"
 	database "github.com/Sabareesh001/penny_tracker_backend/internal/database"
 	redis "github.com/Sabareesh001/penny_tracker_backend/internal/redis"
+	gender_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/gender"
+	user_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 /*
@@ -27,9 +29,11 @@ func main(){
 	DB := database.Connect()
 	redisClient := redis.GetRedisClient(); 
     router := gin.Default()
-	router.Use();
+	router.Use(cors.Default());
 	apiGroup := router.Group("/api")
-	user_routes.UserRoutes(apiGroup.Group("/v1"),DB,redisClient)
+	v1:=apiGroup.Group("/v1")
+	user_routes.UserRoutes(v1,DB,redisClient)
+	gender_routes.GenderRoutes(v1,DB,redisClient);
 	PORT := os.Getenv("PORT")
-    router.Run(":"+PORT)
+    router.Run("0.0.0.0:"+PORT)
 }

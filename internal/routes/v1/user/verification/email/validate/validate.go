@@ -33,5 +33,7 @@ func ValidateOtp(ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client,purpos
 		return errors.New("Not valid")
 	}
 
+	redisClient.Del(emailCtx,redisKey)
+
 	return nil
 }
