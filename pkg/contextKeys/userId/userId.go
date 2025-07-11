@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUserId(ctx *gin.Context) string{
+func GetUserId(ctx *gin.Context) (string,bool){
 	userId,exists := ctx.Get("userId")
+	if(!exists){
+		response.DataInAdequate(ctx)
+		return "",false
+	}
 	UserId :=  strconv.Itoa(int(userId.(float64)))
-		if(!exists){
-			response.SomethingWentWrong(ctx)
-			ctx.Abort()
-		}
-	return UserId
+	return UserId,true
 }

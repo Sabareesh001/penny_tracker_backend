@@ -16,7 +16,6 @@ func ChangePassword(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Cli
 		changePassCtx := context.Background()
 		type Body struct {
 			Email string `json:"email"`
-			Username string `json:"username"`
 			NewPassword string `json:"newPassword"`
 		}
 
@@ -44,7 +43,7 @@ func ChangePassword(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Cli
 
 		model := userModel.User{}
 
-		query := DB.Where("username=? AND email=?",body.Username,body.Email).First(&model)
+		query := DB.Where("email=?",body.Email).First(&model)
         if(query.Error!=nil){
 			if(query.Error.Error()=="record not found"){
 				response.NoMatchingRecords(ctx)
