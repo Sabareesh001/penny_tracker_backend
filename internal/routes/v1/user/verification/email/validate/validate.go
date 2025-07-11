@@ -32,8 +32,10 @@ func ValidateOtp(ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client,purpos
 		ctx.JSON(400, gin.H{"error": "Invalid OTP 🚫"})
 		return errors.New("Not valid")
 	}
-
+    
+	
 	redisClient.Del(emailCtx,redisKey)
-
+	ctx.JSON(200,gin.H{"message":"OTP is verified Successfully 🎉"})
+	
 	return nil
 }

@@ -24,8 +24,8 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
       
 		router.POST("/requestOtp",func(ctx *gin.Context) {
  
-			 UserId := userId.GetUserId(ctx)
-			
+			 UserId,exists := userId.GetUserId(ctx)
+			 if !exists {return}
 			type Body struct{
 				Mobile string `json:"mobile"`
 			}
@@ -61,8 +61,10 @@ func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 	 router.POST("/validateOtp",func(ctx *gin.Context) {
 
-        UserId := userId.GetUserId(ctx)
+        UserId,exists := userId.GetUserId(ctx)
 		
+        if !exists {return}
+
 		type Body struct{
 				Mobile string `json:"mobile"`
 				Otp int `json:"otp"`

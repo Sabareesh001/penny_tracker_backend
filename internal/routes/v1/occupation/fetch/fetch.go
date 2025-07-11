@@ -14,14 +14,14 @@ type SelectModel struct{
 }
 
 func (SelectModel) TableName() string{
-    return "genders"
+    return "occupations"
 }
 
 type CommonGenderModel interface {
-	[]SelectModel | []userModels.Gender
+	[]SelectModel | []userModels.Occupation
 }
 
-func GetGender(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) {
+func GetOccupation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) {
 
 	router.GET("/",func(ctx *gin.Context) {
 
@@ -30,13 +30,13 @@ func GetGender(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) 
 
         switch format {
 				case "select":{
-					var gender []SelectModel;
-					fetchGender(&gender,ctx,DB,redisClient,true)
+					var occupation []SelectModel;
+					fetchOccupation(&occupation,ctx,DB,redisClient)
 					return
 				}
 				default:{
-					var gender []userModels.Gender;
-				    fetchGender(&gender,ctx,DB,redisClient,false)
+					var occupation []userModels.Occupation;
+				    fetchOccupation(&occupation,ctx,DB,redisClient)
 				}
 		}
 
@@ -44,16 +44,11 @@ func GetGender(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) 
 
 }
 
-func fetchGender[T CommonGenderModel](gender *T,ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client,includeIcon bool){
-	                var fetchGender *gorm.DB;
-					if includeIcon{
-                        fetchGender = DB.Find(&gender);
-					} else{
-						fetchGender = DB.Find(&gender);
-					}
+func fetchOccupation[T CommonGenderModel](occupation *T,ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client){
+					fetchGender := DB.Find(&occupation);
 					if(fetchGender.Error != nil){
 						response.SomethingWentWrong(ctx);
 						return;
 					}
-					ctx.AbortWithStatusJSON(200,gin.H{"message":"Succesfully Fetched Data","data":gender});
+					ctx.AbortWithStatusJSON(200,gin.H{"message":"Succesfully Fetched Data","data":occupation});
 }

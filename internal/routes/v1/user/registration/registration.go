@@ -1,6 +1,8 @@
 package registration
 
 import (
+	"fmt"
+
 	userModel "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/hashing/bcrypt"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
@@ -39,6 +41,7 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Cli
 			Email : data.Email,
 		}
 		if err!=nil {
+			fmt.Println(data)
 			response.DataInAdequate(ctx)
 			return
 		}

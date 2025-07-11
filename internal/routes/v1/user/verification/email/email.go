@@ -23,7 +23,8 @@ func EmailVerification(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Cl
 func RequestOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
         
 		router.POST("/requestOtp",func(ctx *gin.Context) {
-		   UserId := userId.GetUserId(ctx)
+		   UserId,exists := userId.GetUserId(ctx)
+		   if !exists {return}
            generateotp.GenerateOtp(ctx,DB,redisClient,UserId,"OTP for Penny Tracker Registration","user:",time.Minute*2)
 		})
 } 
@@ -32,7 +33,9 @@ func ValidateOtp(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Client){
 	
 	 router.POST("/validateOtp",func(ctx *gin.Context) {
 		
-        UserId := userId.GetUserId(ctx)
+        UserId,exists := userId.GetUserId(ctx)
+
+		if !exists {return}
 
         model := userModel.User{}
      

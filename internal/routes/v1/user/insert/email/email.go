@@ -16,7 +16,8 @@ func InsertEmail(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client
 	type Body struct {
 		Email string `form:"email" binding:"required"`
 	}
-     UserId := userId.GetUserId(ctx)
+     UserId,exists := userId.GetUserId(ctx)
+	 if !exists {return}
     body := Body{}
     model := userModel.User{}
 	ctx.ShouldBind(&body)
