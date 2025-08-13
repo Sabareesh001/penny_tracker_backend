@@ -7,6 +7,7 @@ import (
 	database "github.com/Sabareesh001/penny_tracker_backend/internal/database"
 	redis "github.com/Sabareesh001/penny_tracker_backend/internal/redis"
 	country_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/country"
+	currency_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/currency"
 	gender_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/gender"
 	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/metals"
 	occupation_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/occupation"
@@ -44,10 +45,11 @@ func main(){
 	v1:=apiGroup.Group("/v1")
 
 	user_routes.UserRoutes(v1,DB,redisClient)
-	gender_routes.GenderRoutes(v1,DB,redisClient);
-	country_routes.CountryRoutes(v1,DB,redisClient);
-	occupation_routes.OccupationRoutes(v1,DB,redisClient);
-    metals.MetalRoutes(v1,DB,redisClient);
+	gender_routes.GenderRoutes(v1,DB);
+	country_routes.CountryRoutes(v1,DB);
+	currency_routes.CurrencyRoutes(v1,DB);
+	occupation_routes.OccupationRoutes(v1,DB);
+    metals.MetalRoutes(v1,DB);
 	
 	/////////////////////
 

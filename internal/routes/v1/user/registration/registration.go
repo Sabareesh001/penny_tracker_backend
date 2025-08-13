@@ -19,7 +19,7 @@ func UserRegistration(router *gin.RouterGroup,DB *gorm.DB,redisClient *redis.Cli
 			LastName string  `form:"lastName" binding:"required"`
 			Phone string `form:"phone"`
 			Email string `form:"email"`
-			Country int `form:"country" binding:"required"`
+			Country string `form:"country" binding:"required"`
 			Age int `form:"age" binding:"required"`
 			Username string `form:"username" binding:"required"`
 			Password string `form:"password" binding:"required"`

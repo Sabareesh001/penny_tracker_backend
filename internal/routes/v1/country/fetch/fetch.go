@@ -1,54 +1,54 @@
 package fetch
 
 import (
-	userModels "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
+	"encoding/json"
+	"io"
+	"net/http"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-type SelectModel struct{
-	Id uint `gorm:"column:id" json:"value"`
-	Name string 	`gorm:"column:name" json:"label"`
-}
-
-func (SelectModel) TableName() string{
-    return "countries"
-}
-
-type CommonGenderModel interface {
-	[]SelectModel | []userModels.Country
-}
-
-func GetCountry(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) {
+func GetCountry(router *gin.RouterGroup, DB *gorm.DB) {
 
 	router.GET("/",func(ctx *gin.Context) {
 
-		format := ctx.Query("format")
-
-
-        switch format {
-				case "select":{
-					var country []SelectModel;
-					fetchCountry(&country,ctx,DB,redisClient)
-					return
-				}
-				default:{
-					var  country []userModels.Country;
-				    fetchCountry(&country,ctx,DB,redisClient)
-				}
+		
+		type CountryData struct {
+			Name string `json:"name"`
+			Currency string `json:"currency"`
+			UnicodeFlag string `json:"unicodeFlag"`
+			Iso3       string `json:"iso3"`
 		}
+
+		type Body struct {
+			Err bool `json:"err"`
+			Message string `json:"message"`
+			Data []CountryData `json:"data"`
+		}
+
+		resp,err := http.Get("https://countriesnow.space/api/v0.1/countries/info?returns=currency,unicodeFlag,iso3")
+		if(err!=nil){
+			response.SomethingWentWrong(ctx)
+			return
+		}
+
+        defer resp.Body.Close()
+
+		body,err := io.ReadAll(resp.Body)
+
+		parsedBody  := Body{}
+
+		json.Unmarshal(body,&parsedBody)
+
+		if(err!=nil || parsedBody.Err){
+			response.SomethingWentWrong(ctx);
+			return
+		}
+		
+		ctx.AbortWithStatusJSON(200,gin.H{"message":"successfully fetched data","data":parsedBody.Data })
+		
 
 	})
 
-}
-
-func fetchCountry[T CommonGenderModel](country *T,ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client){
-					fetchGender := DB.Find(&country);
-					if(fetchGender.Error != nil){
-						response.SomethingWentWrong(ctx);
-						return;
-					}
-					ctx.AbortWithStatusJSON(200,gin.H{"message":"Succesfully Fetched Data","data":country});
 }

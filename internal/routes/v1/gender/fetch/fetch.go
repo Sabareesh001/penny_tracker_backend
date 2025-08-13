@@ -4,7 +4,6 @@ import (
 	userModels "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +20,7 @@ type CommonGenderModel interface {
 	[]SelectModel | []userModels.Gender
 }
 
-func GetGender(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) {
+func GetGender(router *gin.RouterGroup, DB *gorm.DB) {
 
 	router.GET("/",func(ctx *gin.Context) {
 
@@ -31,12 +30,12 @@ func GetGender(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) 
         switch format {
 				case "select":{
 					var gender []SelectModel;
-					fetchGender(&gender,ctx,DB,redisClient,true)
+					fetchGender(&gender,ctx,DB,true)
 					return
 				}
 				default:{
 					var gender []userModels.Gender;
-				    fetchGender(&gender,ctx,DB,redisClient,false)
+				    fetchGender(&gender,ctx,DB,false)
 				}
 		}
 
@@ -44,7 +43,7 @@ func GetGender(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) 
 
 }
 
-func fetchGender[T CommonGenderModel](gender *T,ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client,includeIcon bool){
+func fetchGender[T CommonGenderModel](gender *T,ctx *gin.Context, DB *gorm.DB,includeIcon bool){
 	                var fetchGender *gorm.DB;
 					if includeIcon{
                         fetchGender = DB.Find(&gender);
