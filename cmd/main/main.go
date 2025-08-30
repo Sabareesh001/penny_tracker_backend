@@ -6,6 +6,7 @@ import (
 
 	database "github.com/Sabareesh001/penny_tracker_backend/internal/database"
 	redis "github.com/Sabareesh001/penny_tracker_backend/internal/redis"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/coins"
 	country_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/country"
 	currency_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/currency"
 	gender_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/gender"
@@ -50,6 +51,7 @@ func main(){
 	currency_routes.CurrencyRoutes(v1,DB);
 	occupation_routes.OccupationRoutes(v1,DB);
     metals.MetalRoutes(v1,DB);
+    coins.CoinRoutes(v1,DB);
 	
 	/////////////////////
 
