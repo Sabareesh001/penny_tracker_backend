@@ -2,6 +2,15 @@ package coins
 
 import "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 
+
+type TrackingStatus string
+
+const (
+    StatusDisabled  TrackingStatus = "0"
+    StatusEnabled TrackingStatus = "1"
+)
+
+
 type Coins struct {
 	Id     int `gorm:"primaryKey"`
 	Name   string
@@ -11,11 +20,13 @@ type Coins struct {
 
 type UserCoinTracking struct {
 	Id     int `gorm:"primaryKey"`
-	Weight float64
+	Quantity float64
 
 	User    int
 	UserKey user.User `gorm:"foreignKey:UserKey"`
 
 	Coin    int
 	CoinKey Coins `gorm:"foreignKey:CoinKey"`
+
+	Status TrackingStatus
 }

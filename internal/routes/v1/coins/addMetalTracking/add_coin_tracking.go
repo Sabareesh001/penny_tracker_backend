@@ -1,19 +1,19 @@
-package add_metal_tracking
+package add_coin_tracking
 
 import (
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/metals"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/coins"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/contextKeys/userId"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func AddMetalTracking(router *gin.RouterGroup, DB *gorm.DB) {
-	router.POST("/tracking/:metalId/:status", func(ctx *gin.Context) {
+func AddCoinTracking(router *gin.RouterGroup, DB *gorm.DB) {
+	router.POST("/tracking/:coinId/:status", func(ctx *gin.Context) {
 
 		StatusCode := http.StatusOK
 
@@ -23,7 +23,7 @@ func AddMetalTracking(router *gin.RouterGroup, DB *gorm.DB) {
 			return
 		}
 
-		MetalID, contains := ctx.Params.Get("metalId")
+		CoinID, contains := ctx.Params.Get("coinId")
 		Status, contains := ctx.Params.Get("status")
 
 		if !contains {
@@ -33,28 +33,28 @@ func AddMetalTracking(router *gin.RouterGroup, DB *gorm.DB) {
 
 		/*Update status if record exits else create new one*/
 
-		record := metals.UserMetalTracking{}
+		record := coins.UserCoinTracking{}
 
-		fmt.Println(MetalID)
+		fmt.Println(CoinID)
 
-		DB.Where("user =? AND metal=?", UserID, MetalID).Find(&record)
+		DB.Where("user =? AND coin=?", UserID, CoinID).Find(&record)
 
 		if record.Id == 0 {
-			numMetalId, err := strconv.Atoi(MetalID)
+			numCoinId, err := strconv.Atoi(CoinID)
 			numUserId, err := strconv.Atoi(UserID)
 			if err != nil {
 				response.SomethingWentWrong(ctx)
 				return
 			}
-			record.Metal = numMetalId
+			record.Coin = numCoinId
 			record.User = numUserId
 			StatusCode = http.StatusCreated
 		}
 
 		if Status == "add" {
-			record.Status = metals.StatusEnabled
+			record.Status = coins.StatusEnabled
 		} else if Status == "remove" {
-			record.Status = metals.StatusDisabled
+			record.Status = coins.StatusDisabled
 		} else {
 			response.DataInAdequate(ctx)
 			return

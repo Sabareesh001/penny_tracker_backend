@@ -2,6 +2,14 @@ package metals
 
 import "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 
+type TrackingStatus string
+
+const (
+    StatusDisabled  TrackingStatus = "0"
+    StatusEnabled TrackingStatus = "1"
+)
+
+
 type Metals struct {
 	Id     int `gorm:"primaryKey"`
 	Name   string
@@ -18,4 +26,6 @@ type UserMetalTracking struct {
 
 	Metal    int
 	MetalKey Metals `gorm:"foreignKey:MetalKey"`
+
+	Status TrackingStatus
 }
