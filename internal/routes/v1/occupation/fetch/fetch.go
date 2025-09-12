@@ -4,7 +4,6 @@ import (
 	userModels "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +20,7 @@ type CommonGenderModel interface {
 	[]SelectModel | []userModels.Occupation
 }
 
-func GetOccupation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Client) {
+func GetOccupation(router *gin.RouterGroup, DB *gorm.DB) {
 
 	router.GET("/",func(ctx *gin.Context) {
 
@@ -31,12 +30,12 @@ func GetOccupation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Clie
         switch format {
 				case "select":{
 					var occupation []SelectModel;
-					fetchOccupation(&occupation,ctx,DB,redisClient)
+					fetchOccupation(&occupation,ctx,DB)
 					return
 				}
 				default:{
 					var occupation []userModels.Occupation;
-				    fetchOccupation(&occupation,ctx,DB,redisClient)
+				    fetchOccupation(&occupation,ctx,DB)
 				}
 		}
 
@@ -44,7 +43,7 @@ func GetOccupation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis.Clie
 
 }
 
-func fetchOccupation[T CommonGenderModel](occupation *T,ctx *gin.Context, DB *gorm.DB, redisClient *redis.Client){
+func fetchOccupation[T CommonGenderModel](occupation *T,ctx *gin.Context, DB *gorm.DB){
 					fetchGender := DB.Find(&occupation);
 					if(fetchGender.Error != nil){
 						response.SomethingWentWrong(ctx);

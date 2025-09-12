@@ -1,23 +1,35 @@
 package response
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 func SomethingWentWrong(ctx *gin.Context){
-	ctx.AbortWithStatusJSON(500,gin.H{"error":"Something Went Wrong 😖"})
+	ctx.AbortWithStatusJSON(http.StatusInternalServerError,gin.H{"error":"Something Went Wrong 😖"})
 }
 
 func DataInAdequate(ctx *gin.Context){
-	ctx.AbortWithStatusJSON(400,gin.H{"error":"Data Inadequate 🗑️"})
+	ctx.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"error":"Data Inadequate 🗑️"})
 }
 
 func NoMatchingRecords(ctx *gin.Context){
-	ctx.AbortWithStatusJSON(400,gin.H{"error":"No Matching Records 🥹"})
+	ctx.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"error":"No Matching Records 🥹"})
 }
 
 func NoSuchUserExist(ctx *gin.Context){
-	ctx.AbortWithStatusJSON(400,gin.H{"error":"No Such User Exist 🚫"})
+	ctx.AbortWithStatusJSON(http.StatusBadRequest,gin.H{"error":"No Such User Exist 🚫"})
 }
 
 func UnauthorizedAccess(ctx *gin.Context){
-	ctx.AbortWithStatusJSON(401,gin.H{"error":"Unauthorized Access 🚫"})
+	ctx.AbortWithStatusJSON(http.StatusUnauthorized,gin.H{"error":"Unauthorized Access 🚫"})
+}
+
+func SuccesfullyInserted(ctx *gin.Context){
+	ctx.AbortWithStatusJSON(http.StatusCreated,gin.H{"message":"Sucessfully Inserted ✅"})
+}
+
+func SuccesfullyUpdated(ctx *gin.Context){
+	ctx.AbortWithStatusJSON(http.StatusAccepted,gin.H{"message":"Successfully Updated ✅"})
 }

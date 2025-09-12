@@ -2,11 +2,10 @@ package get_price
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/metals"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/coins"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/contextKeys/userId"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
@@ -15,26 +14,26 @@ import (
 
 func GetPrice(router *gin.RouterGroup, DB *gorm.DB) {
 
-		router.GET("price/:metal",func(ctx *gin.Context) {
+		router.GET("price/:coin",func(ctx *gin.Context) {
 			
 			UserId,exists := userId.GetUserId(ctx);
 
 			if(!exists){return}
 
-			metalType,contains := ctx.Params.Get("metal")
+			coinType,contains := ctx.Params.Get("coin")
 
-            Metal := metals.Metals{};
+            Coin := coins.Coins{};
 
-			fetchMetal := DB.Where("symbol=?",metalType).Find(&Metal);
+			fetchCoin := DB.Where("symbol=?",coinType).Find(&Coin);
 
-            if(fetchMetal.Error!=nil){
+            if(fetchCoin.Error!=nil){
                     response.DataInAdequate(ctx)
 					return
 			}
 
-            BaseMetalPriceURL := "https://api.gold-api.com"
+            BaseCoinPriceURL := "https://api.gold-api.com"
 
-			symbolsRes,err := http.Get(BaseMetalPriceURL+"/price/"+metalType)
+			symbolsRes,err := http.Get(BaseCoinPriceURL+"/price/"+coinType)
 
             if(err != nil){
                  response.SomethingWentWrong(ctx);
@@ -51,16 +50,15 @@ func GetPrice(router *gin.RouterGroup, DB *gorm.DB) {
 			}
 
 
-			UserMetalMapping := metals.UserMetalTracking{}
+			UserCoinMapping := coins.UserCoinTracking{}
 
-			DB.Where("user=? AND metal=?",UserId,Metal.Id).Find(&UserMetalMapping)
+			DB.Where("user=? AND coin=?",UserId,Coin.Id).Find(&UserCoinMapping)
 			
-			ctx.AbortWithStatusJSON(200,gin.H{"price":json.RawMessage(symbolsBody),"holding":UserMetalMapping.Weight})
+			ctx.AbortWithStatusJSON(200,gin.H{"price":json.RawMessage(symbolsBody),"holding":UserCoinMapping.Quantity})
 
 			if(!contains){
 				response.DataInAdequate(ctx)
 				return;
 			}
-			fmt.Println(metalType);
 		})
 }

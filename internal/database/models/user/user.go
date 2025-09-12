@@ -19,23 +19,19 @@ type User struct {
 	Gender int
 	GenderKey   Gender `gorm:"foreignKey:GenderKey"`
 
-	Country int
-	CountryKey   Country `gorm:"foreignKey:CountryKey"`
+	Country string
 }
 
 
-type Country struct {
-	Id   int    `gorm:"primaryKey"`
-	Name string
-	Code string
-}
 
 type Gender struct {
 	Id   int    `gorm:"primaryKey"`
 	Name string
+	Symbol string
 }
 
 type Occupation struct {
 	Id   int    `gorm:"primaryKey"`
 	Name string
+	Symbol string
 }

@@ -1,6 +1,7 @@
-package metals
+package coins
 
 import "github.com/Sabareesh001/penny_tracker_backend/internal/database/models/user"
+
 
 type TrackingStatus string
 
@@ -10,22 +11,22 @@ const (
 )
 
 
-type Metals struct {
+type Coins struct {
 	Id     int `gorm:"primaryKey"`
 	Name   string
 	Image    string
 	Symbol string
 }
 
-type UserMetalTracking struct {
+type UserCoinTracking struct {
 	Id     int `gorm:"primaryKey"`
-	Weight float64
+	Quantity float64
 
 	User    int
 	UserKey user.User `gorm:"foreignKey:UserKey"`
 
-	Metal    int
-	MetalKey Metals `gorm:"foreignKey:MetalKey"`
+	Coin    int
+	CoinKey Coins `gorm:"foreignKey:CoinKey"`
 
 	Status TrackingStatus
 }
