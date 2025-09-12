@@ -29,3 +29,7 @@ func UnauthorizedAccess(ctx *gin.Context){
 func SuccesfullyInserted(ctx *gin.Context){
 	ctx.AbortWithStatusJSON(http.StatusCreated,gin.H{"message":"Sucessfully Inserted ✅"})
 }
+
+func SuccesfullyUpdated(ctx *gin.Context){
+	ctx.AbortWithStatusJSON(http.StatusAccepted,gin.H{"message":"Successfully Updated ✅"})
+}

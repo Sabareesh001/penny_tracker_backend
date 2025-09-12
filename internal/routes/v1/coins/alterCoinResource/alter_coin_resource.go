@@ -1,21 +1,24 @@
-package alter_metal_resource
+package alter_coin_resource
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"strconv"
-	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/metals"
+
+	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/coins"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/contextKeys/userId"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func AlterMetalResource(router *gin.RouterGroup, DB *gorm.DB){
-	router.POST("/weight",func(ctx *gin.Context) {
+func AlterCoinResource(router *gin.RouterGroup, DB *gorm.DB) {
+
+	router.POST("/quantity",func(ctx *gin.Context) {
 		type Body struct {
-			Metal_id int `json:"metal_id"`
-			Weight float32 `json:"weight"`
+			Coin_id int `json:"metal_id"`
+			Quantity float32 `json:"weight"`
 		}
 
 		UserId,contains := userId.GetUserId(ctx);
@@ -49,12 +52,13 @@ func AlterMetalResource(router *gin.RouterGroup, DB *gorm.DB){
 		}
 		
 		
-		existingEntry := metals.UserMetalTracking{}
+		existingEntry := coins.UserCoinTracking{}
 		
-		existingRecordFetch := DB.Where("user=? AND metal = ?",UserId,bodyContent.Metal_id).Find(&existingEntry)
+		existingRecordFetch := DB.Where("user=? AND coin = ?",UserId,bodyContent.Coin_id).Find(&existingEntry)
 		
+		fmt.Println(bodyContent.Quantity , bodyContent.Coin_id)
 		if(existingRecordFetch.Error != nil){
-			newEntry := metals.UserMetalTracking{ User: userIdInInt,Metal: bodyContent.Metal_id,Weight:float64(bodyContent.Weight),Status: metals.StatusEnabled}
+			newEntry := coins.UserCoinTracking{ User: userIdInInt,Coin: bodyContent.Coin_id,Quantity:float64(bodyContent.Quantity),Status: coins.StatusEnabled}
 			newEntryQuery := DB.Save(&newEntry)
 			if(newEntryQuery.Error == nil){
 				 response.SuccesfullyInserted(ctx)
@@ -65,7 +69,7 @@ func AlterMetalResource(router *gin.RouterGroup, DB *gorm.DB){
 			}
 		}
 
-		existingEntry.Weight = float64(bodyContent.Weight)
+		existingEntry.Quantity = float64(bodyContent.Quantity)
 
         updateRecord := DB.Save(&existingEntry)
 
@@ -76,6 +80,6 @@ func AlterMetalResource(router *gin.RouterGroup, DB *gorm.DB){
 
 		response.SuccesfullyUpdated(ctx)
 
-
 	})
+
 }
