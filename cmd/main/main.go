@@ -10,6 +10,7 @@ import (
 	country_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/country"
 	currency_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/currency"
 	gender_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/gender"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/income"
 	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/metals"
 	occupation_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/occupation"
 	user_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user"
@@ -52,7 +53,8 @@ func main(){
 	occupation_routes.OccupationRoutes(v1,DB);
     metals.MetalRoutes(v1,DB);
     coins.CoinRoutes(v1,DB);
-	
+	income.IncomeRoutes(v1,DB);
+
 	/////////////////////
 
 
