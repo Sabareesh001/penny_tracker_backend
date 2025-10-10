@@ -49,6 +49,7 @@ func UserPassValidation(router *gin.RouterGroup, DB *gorm.DB, redisClient *redis
 		}
         claims := jwt.MapClaims{
 				"userId": model.Id,
+				"userName":model.First_Name,
 				"expiry": time.Now().Add(time.Hour*24).Unix(),
 			}
         token,err := jwtAuth.AssignJWT(claims,[]byte(os.Getenv("JWT_SECRET")))
