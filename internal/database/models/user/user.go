@@ -20,7 +20,7 @@ type User struct {
 	GenderKey   Gender `gorm:"foreignKey:GenderKey"`
 
 	Monthly_Income float32
-
+	Monthly_Income_Currency string
 	Country string
 }
 

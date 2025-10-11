@@ -8,10 +8,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type IncomeData struct {
+	MonthlyIncome         float64 `json:"monthly_income"`
+	MonthlyIncomeCurrency string  `json:"monthly_income_currency"`
+}
+
 func FetchIncome(router *gin.RouterGroup, DB *gorm.DB) {
 
 	router.GET("/",func(ctx *gin.Context) {
-		var row float32
+		var row IncomeData
 		UserId,contains := userId.GetUserId(ctx)
 
         if(!contains){
@@ -19,7 +24,7 @@ func FetchIncome(router *gin.RouterGroup, DB *gorm.DB) {
 			return
 		}
 
-        fetchIncome := DB.Table("users").Select("monthly_income").Where("id = ?",UserId).Find(&row)
+        fetchIncome := DB.Table("users").Select("monthly_income","monthly_income_currency").Where("id = ?",UserId).First(&row)
 
 		if(fetchIncome.Error != nil){
 			response.SomethingWentWrong(ctx)

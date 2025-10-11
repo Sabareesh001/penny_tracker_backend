@@ -17,6 +17,7 @@ func AlterIncome(router *gin.RouterGroup, DB *gorm.DB) {
 
         type Body struct {
 			Income float32 `json:"income"`
+			Currency string `json:"currency"`
 		}
 
 		if(!contains){
@@ -44,7 +45,7 @@ func AlterIncome(router *gin.RouterGroup, DB *gorm.DB) {
 
 
 
-		updateRow := DB.Table("users").Where("id=?",UserId).Update("monthly_income",body.Income)
+		updateRow := DB.Table("users").Where("id=?",UserId).Update("monthly_income",body.Income).Update("monthly_income_currency",body.Currency)
 
 		if(updateRow.Error!=nil){
 			response.SomethingWentWrong(ctx)
