@@ -1,6 +1,7 @@
 package fetch_spending
 
 import (
+	// "fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -30,12 +31,12 @@ func GetMonthlyTotal(router *gin.RouterGroup, DB *gorm.DB) {
 		startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 		endDate := startDate.AddDate(0, 1, 0) // first day of next month
 
-		var total float64
+		var total float64 = 0;
 		if err := DB.Model(&payments.Payments{}).
 			Where("datetime >= ? AND datetime < ? AND user=?", startDate, endDate,UserId).
 			Select("SUM(amount)").Scan(&total).Error; err != nil {
-			response.SomethingWentWrong(ctx)
-			return
+			// response.SomethingWentWrong(ctx)
+			// return
 		}
 
 		ctx.JSON(http.StatusOK, gin.H{
