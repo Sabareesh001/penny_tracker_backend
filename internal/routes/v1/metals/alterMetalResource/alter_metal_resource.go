@@ -2,8 +2,10 @@ package alter_metal_resource
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"strconv"
+
 	"github.com/Sabareesh001/penny_tracker_backend/internal/database/models/metals"
 	"github.com/Sabareesh001/penny_tracker_backend/pkg/contextKeys/userId"
 	response "github.com/Sabareesh001/penny_tracker_backend/pkg/responses"
@@ -53,7 +55,8 @@ func AlterMetalResource(router *gin.RouterGroup, DB *gorm.DB){
 		
 		existingRecordFetch := DB.Where("user=? AND metal = ?",UserId,bodyContent.Metal_id).Find(&existingEntry)
 		
-		if(existingRecordFetch.Error != nil){
+		fmt.Println("userId",existingRecordFetch.RowsAffected)
+		if(existingRecordFetch.RowsAffected == 0){
 			newEntry := metals.UserMetalTracking{ User: userIdInInt,Metal: bodyContent.Metal_id,Weight:float64(bodyContent.Weight),Status: metals.StatusEnabled}
 			newEntryQuery := DB.Save(&newEntry)
 			if(newEntryQuery.Error == nil){

@@ -16,6 +16,7 @@ type Coins struct {
 	Name   string
 	Image    string
 	Symbol string
+	Color string
 }
 
 type UserCoinTracking struct {

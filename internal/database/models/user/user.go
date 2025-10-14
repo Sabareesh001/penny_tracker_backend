@@ -21,6 +21,12 @@ type User struct {
 
 	Monthly_Income float32
 	Monthly_Income_Currency string
+
+	Monthly_Saving_Target float32
+	Monthly_Saving_Currency string
+
+	Alert_Percentage float32
+	
 	Country string
 }
 

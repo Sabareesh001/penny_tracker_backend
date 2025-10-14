@@ -15,6 +15,7 @@ type Metals struct {
 	Name   string
 	Image    string
 	Symbol string
+	Color string
 }
 
 type UserMetalTracking struct {

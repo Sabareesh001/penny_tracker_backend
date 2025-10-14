@@ -13,7 +13,9 @@ import (
 	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/income"
 	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/metals"
 	occupation_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/occupation"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/payment"
 	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/saving"
+	"github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/spending"
 	user_routes "github.com/Sabareesh001/penny_tracker_backend/internal/routes/v1/user"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -56,6 +58,8 @@ func main(){
     coins.CoinRoutes(v1,DB);
 	income.IncomeRoutes(v1,DB);
     saving.SavingRoutes(v1,DB);
+    payment.PaymentRoutes(v1,DB);
+	spending.SpendingRoutes(v1,DB);
 	/////////////////////
 
 
